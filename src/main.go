@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
-	userEntity "github.com/yuitaso/sampleWebServer/entities/user"
+	myUser "github.com/yuitaso/sampleWebServer/entities/user"
 	"github.com/yuitaso/sampleWebServer/env"
 	"log"
 )
@@ -19,7 +19,10 @@ func helloHandler(c *gin.Context) {
 }
 
 func userHandler(c *gin.Context) {
-	newUser := userEntity.User{Name: "yui", Password: "pass"}
+	newUser, err := myUser.Create()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	c.JSON(200, gin.H{"name": newUser.Name, "password": newUser.Password})
 }
@@ -34,8 +37,6 @@ func identifiedUserHandler(c *gin.Context) {
 		// error
 		c.JSON(500, gin.H{}) // いい感じに返すConfがあるはず
 	}
-	fmt.Println("おけ??")
-	fmt.Println(request.Id)
 
 	// open db
 	db, err := sql.Open("sqlite3", env.DbName)
@@ -56,54 +57,24 @@ func identifiedUserHandler(c *gin.Context) {
 	defer stmt.Close()
 
 	// exec
-	var data_user userEntity.User
-	err = stmt.QueryRow(1).Scan(&data_user.Name, &data_user.Password)
+	var data_user myUser.User
+	err = stmt.QueryRow(request.Id).Scan(&data_user.Name, &data_user.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		c.JSON(500, gin.H{"message": "invalid id."}) // fix me
+		return
 	}
 
 	c.JSON(200, gin.H{"id": request.Id, "name": data_user.Name, "password": data_user.Password})
 }
 
-func withManagerHandler(c *gin.Context) {
-	var request RequestData
-	if err := c.ShouldBindUri(&request); err != nil {
-		// error
-		c.JSON(500, gin.H{}) // いい感じに返すConfがあるはず
-	}
-	fmt.Println("おけ??")
-	fmt.Println(request.Id)
-
-	// open db
-	db, err := sql.Open("sqlite3", env.DbName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// create statement
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("select name, pass from user where id = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// exec
-	var data_user userEntity.User
-	err = stmt.QueryRow(1).Scan(&data_user.Name, &data_user.Password)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c.JSON(200, gin.H{"id": request.Id, "name": data_user.Name, "password": data_user.Password})
-}
-
-func dbConnHandler(c *gin.Context) {
+func createUserHandler(c *gin.Context) {
 	fmt.Println("createするよ〜")
+
+	newUser, err := myUser.Create()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// open db
 	db, err := sql.Open("sqlite3", env.DbName)
@@ -124,7 +95,7 @@ func dbConnHandler(c *gin.Context) {
 	defer stmt.Close()
 
 	// exec
-	_, err = stmt.Exec("yui", "pass")
+	_, err = stmt.Exec(newUser.Name, newUser.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,7 +113,6 @@ func main() {
 	r.GET("/ping", helloHandler)
 	r.GET("/user", userHandler)
 	r.GET("/user/:id", identifiedUserHandler)
-	r.GET("/user/create", dbConnHandler)
-	r.GET("/user/list", withManagerHandler)
+	r.GET("/user/create", createUserHandler)
 	r.Run()
 }
