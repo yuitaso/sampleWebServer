@@ -11,7 +11,6 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/ping", healthCheckHandler)
-
 	userGroup := r.Group("/user")
 	{
 		userGroup.GET("/create", userHandler.Create)
@@ -20,7 +19,7 @@ func main() {
 
 	err := r.Run()
 	if err != nil {
-		log.Fatal("起動失敗")
+		log.Fatal("起動失敗") // fix me
 	}
 }
 

@@ -1,4 +1,4 @@
-package manager
+package user
 
 import (
 	"fmt"
@@ -29,17 +29,16 @@ func Create(newUser user.User) error {
 	return nil
 }
 
-func FindById(id int) user.User {
+func FindById(id int) (user.User, error) {
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
-		// err
 		fmt.Println("DB開くところでエラー")
 	}
 
-	var res UserModel
-	db.First(&res, id)
-	fmt.Println("めも")
-	fmt.Println(res)
+	var result UserModel
+	if exec := db.First(&result, id); exec.Error != nil {
+		return user.User{}, exec.Error
+	}
 
-	return user.User{Name: res.Name, Password: res.Password}
+	return user.User{Name: result.Name, Password: result.Password}, nil
 }
