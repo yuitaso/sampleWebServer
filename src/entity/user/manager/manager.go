@@ -3,7 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/yuitaso/sampleWebServer/env"
-	"github.com/yuitaso/sampleWebServer/src/entities/user"
+	"github.com/yuitaso/sampleWebServer/src/entity/user"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

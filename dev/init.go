@@ -3,7 +3,7 @@ package main
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/env"
-	userManager "github.com/yuitaso/sampleWebServer/src/entities/user/manager"
+	userManager "github.com/yuitaso/sampleWebServer/src/entity/user/manager"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
