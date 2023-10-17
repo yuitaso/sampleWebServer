@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
-	myUser "github.com/yuitaso/sampleWebServer/entities/user"
 	"github.com/yuitaso/sampleWebServer/env"
+	"github.com/yuitaso/sampleWebServer/src/entities/user"
+	userManager "github.com/yuitaso/sampleWebServer/src/entities/user/manager"
 	"log"
 )
 
@@ -71,37 +72,11 @@ func identifiedUserHandler(c *gin.Context) {
 func createUserHandler(c *gin.Context) {
 	fmt.Println("createするよ〜")
 
-	newUser, err := myUser.Create()
+	newUser := user.User{Name: "outer manager", Password: "xxx"}
+	err := userManager.Create(newUser)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	// open db
-	db, err := sql.Open("sqlite3", env.DbName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// create statement
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("insert into user(name, pass) values(?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// exec
-	_, err = stmt.Exec(newUser.Name, newUser.Password)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = tx.Commit()
-	if err != nil {
-		log.Fatal(err)
+		c.JSON(500, gin.H{"message": "fail to insert."})
+		return
 	}
 
 	c.JSON(200, gin.H{"message": "でけた"})
