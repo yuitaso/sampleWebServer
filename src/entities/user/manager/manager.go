@@ -1,42 +1,45 @@
 package manager
 
 import (
-	"database/sql"
+	"fmt"
 	"github.com/yuitaso/sampleWebServer/env"
 	"github.com/yuitaso/sampleWebServer/src/entities/user"
-	"log"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
+type UserModel struct {
+	gorm.Model
+	Name     string
+	Password string
+}
+
+func (u UserModel) TableName() string {
+	return "user"
+}
+
 func Create(newUser user.User) error {
-	u := user.User{Name: "manager created", Password: "pass"}
-
-	// open db
-	db, err := sql.Open("sqlite3", env.DbName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// create statement
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("insert into user(name, pass) values(?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// exec
-	_, err = stmt.Exec(newUser.Name, newUser.Password)
+	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-	err = tx.Commit()
+
+	// Create
+	db.Create(&UserModel{Name: newUser.Name, Password: newUser.Password})
+	return nil
+}
+
+func FindById(id int) user.User {
+	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		// err
+		fmt.Println("DB開くところでエラー")
 	}
 
-	return nil
+	var res UserModel
+	db.First(&res, id)
+	fmt.Println("めも")
+	fmt.Println(res)
+
+	return user.User{Name: res.Name, Password: res.Password}
 }

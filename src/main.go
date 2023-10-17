@@ -1,14 +1,11 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/yuitaso/sampleWebServer/env"
 	"github.com/yuitaso/sampleWebServer/src/entities/user"
 	userManager "github.com/yuitaso/sampleWebServer/src/entities/user/manager"
-	"log"
+	"strconv"
 )
 
 func helloHandler(c *gin.Context) {
@@ -20,10 +17,7 @@ func helloHandler(c *gin.Context) {
 }
 
 func userHandler(c *gin.Context) {
-	newUser, err := myUser.Create()
-	if err != nil {
-		log.Fatal(err)
-	}
+	newUser := user.User{Name: "aaa", Password: "xxx"}
 
 	c.JSON(200, gin.H{"name": newUser.Name, "password": newUser.Password})
 }
@@ -34,52 +28,26 @@ type RequestData struct {
 
 func identifiedUserHandler(c *gin.Context) {
 	var request RequestData
-	if err := c.ShouldBindUri(&request); err != nil {
-		// error
-		c.JSON(500, gin.H{}) // いい感じに返すConfがあるはず
+	var id int
+
+	err := c.ShouldBindUri(&request)
+	id, err = strconv.Atoi(request.Id)
+	if err != nil {
+		c.JSON(500, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず
 	}
 
-	// open db
-	db, err := sql.Open("sqlite3", env.DbName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	res := userManager.FindById(id)
 
-	// create statement
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("select name, pass from user where id = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	// exec
-	var data_user myUser.User
-	err = stmt.QueryRow(request.Id).Scan(&data_user.Name, &data_user.Password)
-	if err != nil {
-		log.Println(err)
-		c.JSON(500, gin.H{"message": "invalid id."}) // fix me
-		return
-	}
-
-	c.JSON(200, gin.H{"id": request.Id, "name": data_user.Name, "password": data_user.Password})
+	c.JSON(200, gin.H{"id": request.Id, "name": res.Name, "password": res.Password})
 }
 
 func createUserHandler(c *gin.Context) {
-	fmt.Println("createするよ〜")
-
-	newUser := user.User{Name: "outer manager", Password: "xxx"}
-	err := userManager.Create(newUser)
+	err := userManager.Create(user.User{Name: "gorm try", Password: "hoge"})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "fail to insert."})
-		return
+		c.JSON(500, gin.H{"message": "できんかった"})
 	}
 
-	c.JSON(200, gin.H{"message": "でけた"})
+	c.JSON(200, gin.H{"message": "できた"})
 }
 
 func main() {

@@ -1,9 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/env"
+	userManager "github.com/yuitaso/sampleWebServer/src/entities/user/manager"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -12,19 +14,12 @@ func main() {
 }
 
 func initDBTables() {
-	db, err := sql.Open("sqlite3", env.DbName)
+	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-
-	// create User table
-	sqlStmt := `
-	create table user (id integer not null primary key, name text, pass text);
-	`
-	_, err = db.Exec(sqlStmt)
+	err = db.Table("user").AutoMigrate(&userManager.UserModel{})
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Fatal(err)
 	}
-
 }
