@@ -29,10 +29,10 @@ func GetOneById(c *gin.Context) {
 }
 
 func Create(c *gin.Context) {
-	err := userManager.Create(user.User{Name: "refactor iikanji", Password: "hoge"})
+	id, err := userManager.Create(user.User{Name: "refactor iikanji", Password: "hoge"})
 	if err != nil {
 		c.JSON(500, gin.H{"message": "できんかった"})
 	}
 
-	c.JSON(200, gin.H{"message": "できた"})
+	c.JSON(200, gin.H{"user_id": id})
 }

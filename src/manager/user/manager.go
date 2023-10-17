@@ -18,15 +18,17 @@ func (u UserModel) TableName() string {
 	return "user"
 }
 
-func Create(newUser user.User) error {
+func Create(newUser user.User) (uint, error) {
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	// Create
-	db.Create(&UserModel{Name: newUser.Name, Password: newUser.Password})
-	return nil
+	model := UserModel{Name: newUser.Name, Password: newUser.Password}
+	if executed := db.Create(&model); executed.Error != nil {
+		return 0, executed.Error
+	}
+	return model.ID, nil
 }
 
 func FindById(id int) (user.User, error) {
@@ -36,8 +38,8 @@ func FindById(id int) (user.User, error) {
 	}
 
 	var result UserModel
-	if exec := db.First(&result, id); exec.Error != nil {
-		return user.User{}, exec.Error
+	if executed := db.First(&result, id); executed.Error != nil {
+		return user.User{}, executed.Error
 	}
 
 	return user.User{Name: result.Name, Password: result.Password}, nil
