@@ -1,46 +1,62 @@
 package user
 
 import (
+	"errors"
 	"fmt"
 	"github.com/yuitaso/sampleWebServer/env"
 	"github.com/yuitaso/sampleWebServer/src/entity"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"strings"
 )
 
-type UserModel struct {
+type UserTable struct {
 	gorm.Model
-	Name     string
+	Email    string
 	Password string
 }
 
-func (u UserModel) TableName() string {
+func (u UserTable) TableName() string {
 	return "user"
 }
 
-func Create(newUser entity.User) (uint, error) {
+func Create(email string, rawPass string) (uint, error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(rawPass), bcrypt.MinCost) // fix me コスト最適化
+	data := UserTable{Email: email, Password: string(hashed)}
+	err = data.Validate()
+	if err != nil {
+		return 0, err
+	}
+
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		return 0, err
 	}
 
-	model := UserModel{Name: newUser.Name, Password: newUser.Password}
-	if executed := db.Create(&model); executed.Error != nil {
+	if executed := db.Create(&data); executed.Error != nil {
 		return 0, executed.Error
 	}
-	return model.ID, nil
+	return data.ID, nil
 }
 
 func FindById(id int) (entity.User, error) {
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
-		fmt.Println("DB開くところでエラー")
+		return entity.User{}, err
 	}
 
-	var result UserModel
+	var result UserTable
 	if executed := db.First(&result, id); executed.Error != nil {
 		return entity.User{}, executed.Error
 	}
 
-	return entity.User{Name: result.Name, Password: result.Password}, nil
+	return entity.User{Email: result.Email}, nil // TODO Email
+}
+
+func (u UserTable) Validate() error {
+	if !strings.Contains(u.Email, "@") { // fix me iikanji
+		return errors.New(fmt.Sprintf("Unexpected format of email: %v", u.Email))
+	}
+	return nil
 }

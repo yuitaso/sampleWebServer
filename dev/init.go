@@ -18,7 +18,7 @@ func initDBTables() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = db.Table("user").AutoMigrate(&userManager.UserModel{})
+	err = db.Table("user").AutoMigrate(&userManager.UserTable{})
 	if err != nil {
 		log.Fatal(err)
 	}

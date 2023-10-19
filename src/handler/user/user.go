@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yuitaso/sampleWebServer/src/entity"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 	"net/http"
 	"strconv"
@@ -26,11 +25,11 @@ func GetOneById(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "name": res.Name, "password": res.Password})
+	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "name": res.Email})
 }
 
 type CreateRequest struct {
-	Name     string `form:"name" binding:"required"`
+	Email    string `form:"email" binding:"required"`
 	Password string `form:"password" binding:"required"`
 }
 
@@ -42,9 +41,10 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	id, err := userManager.Create(entity.User{Name: request.Name, Password: request.Password})
+	id, err := userManager.Create(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user_id": id})
