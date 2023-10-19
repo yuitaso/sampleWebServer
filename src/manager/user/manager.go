@@ -54,8 +54,24 @@ func FindById(id int) (entity.User, error) {
 	return entity.User{Email: result.Email}, nil // TODO Email
 }
 
+func Authenticate(email string, password string) error {
+	var db *gorm.DB
+	var err error = nil
+
+	if db, err = gorm.Open(sqlite.Open(env.DbName), &gorm.Config{}); err != nil {
+		return err
+	}
+
+	var result UserTable
+	if executed := db.First(&result, "email = ?", email); executed.Error != nil {
+		return executed.Error
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password)) // imo 毎回キャストするとメモリ効率が悪いのでいい感じにしたい
+}
+
 func (u UserTable) Validate() error {
-	if !strings.Contains(u.Email, "@") { // fix me iikanji
+	if !strings.Contains(u.Email, "@") { // とりあえず
 		return errors.New(fmt.Sprintf("Unexpected format of email: %v", u.Email))
 	}
 	return nil

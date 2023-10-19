@@ -10,11 +10,16 @@ import (
 func main() {
 	r := gin.Default()
 
-	r.GET("/ping", healthCheckHandler)
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/create", userHandler.Create)
 		userGroup.GET("/:id", userHandler.GetOneById)
+		userGroup.POST("/authenticate", userHandler.Authenticate)
+	}
+
+	internalGroup := r.Group("/internal")
+	{
+		internalGroup.GET("/ping", healthCheckHandler)
 	}
 
 	err := r.Run()

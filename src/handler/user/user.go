@@ -49,3 +49,24 @@ func Create(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"user_id": id})
 }
+
+type AuthRequest struct {
+	Email    string `form:"email" binding:"required"`
+	Password string `form:"password" binding:"required"`
+}
+
+func Authenticate(c *gin.Context) {
+	var request AuthRequest
+	err := c.Bind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if err := userManager.Authenticate(request.Email, request.Password); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success"})
+}
