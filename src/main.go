@@ -13,7 +13,7 @@ func main() {
 	r.GET("/ping", healthCheckHandler)
 	userGroup := r.Group("/user")
 	{
-		userGroup.POST("/create", userHandler.Create) // TODO post
+		userGroup.POST("/create", userHandler.Create)
 		userGroup.GET("/:id", userHandler.GetOneById)
 	}
 

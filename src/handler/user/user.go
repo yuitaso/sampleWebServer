@@ -2,22 +2,22 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yuitaso/sampleWebServer/src/entity/user"
+	"github.com/yuitaso/sampleWebServer/src/entity"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 	"net/http"
 	"strconv"
 )
 
-type GetUserRequest struct { // TODO naming
+type GetOneByIdUri struct {
 	Id string `uri:"id" binding:"required"`
 }
 
 func GetOneById(c *gin.Context) {
-	var request GetUserRequest // TODO naming requestはformdataで使ってるから別の名前にする
+	var uri GetOneByIdUri
 	var id int
 
-	err := c.ShouldBindUri(&request)
-	id, err = strconv.Atoi(request.Id)
+	err := c.ShouldBindUri(&uri)
+	id, err = strconv.Atoi(uri.Id)
 	if err != nil {
 		c.JSON(500, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず
 	}
@@ -26,7 +26,7 @@ func GetOneById(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"id": request.Id, "name": res.Name, "password": res.Password})
+	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "name": res.Name, "password": res.Password})
 }
 
 type CreateRequest struct {
@@ -42,7 +42,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	id, err := userManager.Create(user.User{Name: request.Name, Password: request.Password})
+	id, err := userManager.Create(entity.User{Name: request.Name, Password: request.Password})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}

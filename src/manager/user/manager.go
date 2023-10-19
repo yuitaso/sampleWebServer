@@ -3,7 +3,7 @@ package user
 import (
 	"fmt"
 	"github.com/yuitaso/sampleWebServer/env"
-	"github.com/yuitaso/sampleWebServer/src/entity/user"
+	"github.com/yuitaso/sampleWebServer/src/entity"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -18,7 +18,7 @@ func (u UserModel) TableName() string {
 	return "user"
 }
 
-func Create(newUser user.User) (uint, error) {
+func Create(newUser entity.User) (uint, error) {
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		return 0, err
@@ -31,7 +31,7 @@ func Create(newUser user.User) (uint, error) {
 	return model.ID, nil
 }
 
-func FindById(id int) (user.User, error) {
+func FindById(id int) (entity.User, error) {
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		fmt.Println("DB開くところでエラー")
@@ -39,8 +39,8 @@ func FindById(id int) (user.User, error) {
 
 	var result UserModel
 	if executed := db.First(&result, id); executed.Error != nil {
-		return user.User{}, executed.Error
+		return entity.User{}, executed.Error
 	}
 
-	return user.User{Name: result.Name, Password: result.Password}, nil
+	return entity.User{Name: result.Name, Password: result.Password}, nil
 }
