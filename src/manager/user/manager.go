@@ -3,7 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
-	"github.com/yuitaso/sampleWebServer/env"
+	"github.com/yuitaso/sampleWebServer/src/env"
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
@@ -13,6 +13,7 @@ import (
 
 type UserTable struct {
 	gorm.Model
+	IdHash string
 	Email    string
 	Password string
 }
@@ -24,8 +25,7 @@ func (u UserTable) TableName() string {
 func Create(email string, rawPass string) (uint, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(rawPass), bcrypt.MinCost) // fix me コスト最適化
 	data := UserTable{Email: email, Password: string(hashed)}
-	err = data.Validate()
-	if err != nil {
+	if err = data.Validate(); err != nil {
 		return 0, err
 	}
 

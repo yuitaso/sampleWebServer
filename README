@@ -1,0 +1,16 @@
+## environment
+
+```sh
+make check
+```
+go 1.21.3
+
+## run
+```sh
+make install
+make server
+```
+
+```
+curl 'http://localhost:8080/internal/ping' 
+```
