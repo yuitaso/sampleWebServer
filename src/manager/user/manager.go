@@ -61,7 +61,7 @@ func FindById(id int) (entity.User, error) {
 		return entity.User{}, executed.Error
 	}
 
-	return entity.User{Email: result.Email}, nil // TODO Email
+	return entity.User{IdHash: result.IdHash, Email: result.Email}, nil
 }
 
 func Authenticate(email string, password string) error {

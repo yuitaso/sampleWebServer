@@ -1,10 +1,11 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
-	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
 
 type GetOneByIdUri struct {
@@ -18,14 +19,14 @@ func GetOneById(c *gin.Context) {
 	err := c.ShouldBindUri(&uri)
 	id, err = strconv.Atoi(uri.Id)
 	if err != nil {
-		c.JSON(500, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず
 	}
 
 	res, err := userManager.FindById(id)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "cannot find.", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "name": res.Email})
+	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.IdHash, "email": res.Email})
 }
 
 type CreateRequest struct {
