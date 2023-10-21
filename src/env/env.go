@@ -1,4 +1,3 @@
 package env
 
-const DbName = ""
-
+const DbName = "./sqlite/api.db"

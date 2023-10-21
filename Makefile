@@ -10,12 +10,12 @@ install:
 	go mod tidy
 
 init: sqlite
-	go run dev/init.go -dbPath='$(DB_PATH)'
+	go run dev/init.go
 
 server:
-	go run src/main.go -dbPath=$(DB_PATH)
+	go run src/main.go
 
-clear:
+clean:
 	rm -rf $(REPOSITORY_ROOT)/sqlite/
 
 sqlite:

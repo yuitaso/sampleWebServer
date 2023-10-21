@@ -1,20 +1,14 @@
 package main
 
 import (
+	"log"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/src/env"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"log"
-	"flag"
-	"fmt"
 )
-
-func init() {
-    flag.Parse()
-    fmt.Println(flag.Args())
-}
 
 func main() {
 	initDBTables()
