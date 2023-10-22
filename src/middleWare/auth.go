@@ -10,8 +10,8 @@ import (
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// t := c.Request.Header.Get("X-Token")
-		// fmt.Println(t)
+		t := c.Request.Header.Get("X-Token")
+		fmt.Println(t)
 
 		tokenString, err := auth.GenerateToken()
 		if err != nil {

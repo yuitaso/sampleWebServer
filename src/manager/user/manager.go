@@ -65,9 +65,11 @@ func FindById(id int) (entity.User, error) {
 	return entity.User{IdHash: result.IdHash, Email: result.Email}, nil
 }
 
-func Authenticate(email string, password string) error {
+func VerifyPassword(email string, password string) error {
 	var db *gorm.DB
 	var err error = nil
+
+	fmt.Println(email, password)
 
 	if db, err = gorm.Open(sqlite.Open(env.DbName), &gorm.Config{}); err != nil {
 		return err
@@ -77,6 +79,8 @@ func Authenticate(email string, password string) error {
 	if executed := db.First(&result, "email = ?", email); executed.Error != nil {
 		return executed.Error
 	}
+
+	fmt.Println("db password", result.Password)
 
 	return bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password)) // imo 毎回キャストするとメモリ効率が悪いのでいい感じにしたい
 }

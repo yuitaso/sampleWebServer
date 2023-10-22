@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yuitaso/sampleWebServer/src/auth"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
 
@@ -65,11 +66,17 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	// if err := userManager.Authenticate(request.Email, request.Password); err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-	// 	return
-	// }
+	if err := userManager.VerifyPassword(request.Email, request.Password); err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized."})
+		return
+	}
 
-	c.Header("X-Token", "hogehoge")
+	token, err := auth.GenerateToken()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Faild to issue token.")})
+		return
+	}
+
+	c.Header("X-Token", token)
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
