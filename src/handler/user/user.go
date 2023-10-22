@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,7 @@ func GetOneById(c *gin.Context) {
 	var id int
 
 	err := c.ShouldBindUri(&uri)
+	fmt.Println(uri.Id)
 	id, err = strconv.Atoi(uri.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず

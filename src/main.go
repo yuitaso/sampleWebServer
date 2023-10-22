@@ -1,28 +1,32 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	userHandler "github.com/yuitaso/sampleWebServer/src/handler/user"
-	"log"
+	middleware "github.com/yuitaso/sampleWebServer/src/middleWare"
 )
 
 func main() {
 	r := gin.Default()
 
-	userGroup := r.Group("/user")
+	authorized := r.Group("/")
+	authorized.Use(middleware.AuthRequired())
 	{
-		userGroup.POST("/create", userHandler.Create)
-		userGroup.GET("/:id", userHandler.GetOneById)
-		userGroup.POST("/authenticate", userHandler.Authenticate)
+		authorized.GET("user/:id", userHandler.GetOneById)
 	}
+
+	r.POST("/user/create", userHandler.Create)
+	r.POST("/authenticate", userHandler.Authenticate) // TODO handlerの置き場変える
 
 	internalGroup := r.Group("/internal")
 	{
 		internalGroup.GET("/ping", healthCheckHandler)
 	}
 
-	err := r.Run()
+	err := r.Run(":8080")
 	if err != nil {
 		log.Fatal("起動失敗") // fix me
 	}
