@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yuitaso/sampleWebServer/src/auth"
+	"github.com/yuitaso/sampleWebServer/src/entity"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
 
@@ -29,6 +30,18 @@ func GetOneById(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
 	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.Uuid, "email": res.Email})
+}
+
+func GetUserMe(c *gin.Context) {
+	var user *entity.User
+	if val, exists := c.Get("authUser"); !exists {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "ise."})
+		return
+	} else {
+		user = val.(*entity.User)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"id": user.Uuid, "id_hash": user.Uuid, "email": user.Email})
 }
 
 type CreateRequest struct {
