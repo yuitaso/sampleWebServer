@@ -10,17 +10,15 @@ import (
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		t := c.Request.Header.Get("X-Token")
-		fmt.Println(t)
+		tokenString := c.Request.Header.Get("X-Token")
+		fmt.Println("とーくんきたよ", tokenString)
 
-		tokenString, err := auth.GenerateToken()
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": err.Error()})
+		token, err := auth.ParseToken(tokenString)
+		if err != nil || !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Unauthrized."})
 		}
 
-		fmt.Println("作成済")
-
-		auth.VelifyToken(tokenString)
+		fmt.Println(token.Claims.(*auth.AuthClaims).Uuid)
 		c.Next()
 	}
 }

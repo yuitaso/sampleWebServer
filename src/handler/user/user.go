@@ -28,7 +28,7 @@ func GetOneById(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.IdHash, "email": res.Email})
+	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.Uuid, "email": res.Email})
 }
 
 type CreateRequest struct {
@@ -66,12 +66,13 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	if err := userManager.VerifyPassword(request.Email, request.Password); err != nil {
+	user, err := userManager.VerifyPassword(request.Email, request.Password)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized."})
 		return
 	}
 
-	token, err := auth.GenerateToken()
+	token, err := auth.GenerateToken(user)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("Faild to issue token.")})
 		return
