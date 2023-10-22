@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -64,10 +65,11 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	if err := userManager.Authenticate(request.Email, request.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
+	// if err := userManager.Authenticate(request.Email, request.Password); err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	// 	return
+	// }
 
+	c.Header("X-Token", "hogehoge")
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }

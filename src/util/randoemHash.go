@@ -34,6 +34,6 @@ func GenerateRandomHash() (string, error) {
 
 func MustNot(e error) {
 	if e != nil {
-		log.Fatal(e.Error())
+		log.Fatal(e.Error()) // TODO iikanji
 	}
 }

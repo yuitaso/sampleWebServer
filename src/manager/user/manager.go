@@ -35,9 +35,10 @@ func Create(email string, rawPass string) (uint, error) {
 	}
 
 	data := UserTable{IdHash: idHash, Email: email, Password: string(passwordHash)}
-	if err = data.Validate(); err != nil {
-		return 0, err
-	}
+	// とりま
+	// if err = data.Validate(); err != nil {
+	// 	return 0, err
+	// }
 
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
