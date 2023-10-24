@@ -9,8 +9,13 @@ import (
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	itemHandler "github.com/yuitaso/sampleWebServer/src/handler/item"
 	userHandler "github.com/yuitaso/sampleWebServer/src/handler/user"
+	"github.com/yuitaso/sampleWebServer/src/manager"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
+
+func init() {
+	manager.OpenDB()
+}
 
 func main() {
 	r := gin.Default()
@@ -60,4 +65,8 @@ func authRequired(c *gin.Context) { // TODO いい感じの置き場にGO
 
 	c.Set(entity.CtxAuthUserKey, user)
 	c.Next()
+}
+
+func openDatabase() {
+
 }

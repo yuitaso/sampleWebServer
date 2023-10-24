@@ -7,9 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yuitaso/sampleWebServer/src/entity"
-	"github.com/yuitaso/sampleWebServer/src/env"
+	"github.com/yuitaso/sampleWebServer/src/manager"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -40,25 +39,15 @@ func Insert(email string, rawPass string) (uint, error) {
 	// 	return 0, err
 	// }
 
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return 0, err
-	}
-
-	if executed := db.Create(&data); executed.Error != nil {
+	if executed := manager.DB.Create(&data); executed.Error != nil {
 		return 0, executed.Error
 	}
 	return data.ID, nil
 }
 
 func FindById(id int) (entity.User, error) {
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return entity.User{}, err
-	}
-
 	var result UserTable
-	if executed := db.First(&result, id); executed.Error != nil {
+	if executed := manager.DB.First(&result, id); executed.Error != nil {
 		return entity.User{}, executed.Error
 	}
 
@@ -66,17 +55,8 @@ func FindById(id int) (entity.User, error) {
 }
 
 func VerifyAndGetUser(email string, password string) (*entity.User, error) {
-	var db *gorm.DB
-	var err error = nil
-
-	fmt.Println(email, password)
-
-	if db, err = gorm.Open(sqlite.Open(env.DbName), &gorm.Config{}); err != nil {
-		return &entity.User{}, err
-	}
-
 	var result UserTable
-	if executed := db.First(&result, "email = ?", email); executed.Error != nil {
+	if executed := manager.DB.First(&result, "email = ?", email); executed.Error != nil {
 		return &entity.User{}, executed.Error
 	}
 

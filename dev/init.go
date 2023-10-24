@@ -16,10 +16,13 @@ func main() {
 }
 
 func initDBTables() {
+	// open
 	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// migrate
 	err = db.Table("user").AutoMigrate(&userManager.UserTable{})
 	if err != nil {
 		log.Fatal(err)

@@ -3,8 +3,7 @@ package item
 import (
 	"github.com/google/uuid"
 	"github.com/yuitaso/sampleWebServer/src/entity"
-	"github.com/yuitaso/sampleWebServer/src/env"
-	"gorm.io/driver/sqlite"
+	"github.com/yuitaso/sampleWebServer/src/manager"
 	"gorm.io/gorm"
 )
 
@@ -27,12 +26,8 @@ func Insert(user *entity.User, price int) (*uuid.UUID, error) {
 	}
 
 	data := ItemTable{Uuid: uuid.String(), Price: price, UserId: user.Id}
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
 
-	if executed := db.Create(&data); executed.Error != nil {
+	if executed := manager.DB.Create(&data); executed.Error != nil {
 		return nil, executed.Error
 	}
 	return &uuid, nil
@@ -40,12 +35,8 @@ func Insert(user *entity.User, price int) (*uuid.UUID, error) {
 
 func Update(item *entity.Item) error {
 	values := generateUpdateValus(item)
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return err
-	}
 
-	if executed := db.Model(&ItemTable{}).Where("uuid = ? ", item.Uuid.String()).Updates(values); executed.Error != nil {
+	if executed := manager.DB.Model(&ItemTable{}).Where("uuid = ? ", item.Uuid.String()).Updates(values); executed.Error != nil {
 		return executed.Error
 	}
 	return nil
@@ -59,13 +50,8 @@ func generateUpdateValus(item *entity.Item) *map[string]interface{} {
 }
 
 func FindByUuid(id uuid.UUID) (*entity.Item, error) {
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-
 	var result ItemTable
-	if executed := db.Where("uuid = ?", id.String()).First(&result); executed.Error != nil {
+	if executed := manager.DB.Where("uuid = ?", id.String()).First(&result); executed.Error != nil {
 		return nil, executed.Error
 	}
 
@@ -78,12 +64,7 @@ func FindByUuid(id uuid.UUID) (*entity.Item, error) {
 }
 
 func Delete(id uuid.UUID) error {
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
-	if err != nil {
-		return err
-	}
-
-	if executed := db.Where("uuid = ?", id.String()).Delete(&ItemTable{}); executed.Error != nil {
+	if executed := manager.DB.Where("uuid = ?", id.String()).Delete(&ItemTable{}); executed.Error != nil {
 		return executed.Error
 	}
 
