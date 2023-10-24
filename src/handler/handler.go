@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,6 @@ func GetAuthUserOrErrorRsponse(c *gin.Context) (*entity.User, bool) {
 		WhenInternalServerError(c, errors.New("Cannnot identify auth user."))
 		return nil, exists
 	}
-	fmt.Println("CTVユーザー", val)
 	return val.(*entity.User), exists
 }
 

@@ -79,10 +79,9 @@ func Edit(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("元データ", originalItem)
-	fmt.Println("ユーザー", authUser)
-	if authUser.Id != originalItem.UserId {
+	if !originalItem.IsOwner(authUser) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have permission to edit this item."})
+		return
 	}
 
 	// ----
@@ -105,6 +104,7 @@ type deleteUri struct {
 }
 
 func Delete(c *gin.Context) {
+	// parse uri
 	var uri deleteUri
 	err := c.ShouldBindUri(&uri)
 	if err != nil {
@@ -117,6 +117,25 @@ func Delete(c *gin.Context) {
 		return
 	}
 
+	// get requested user
+	authUser, ok := handler.GetAuthUserOrErrorRsponse(c)
+	if !ok {
+		return
+	}
+
+	// check permission
+	item, err := itemManager.FindByUuid(requested_uuid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid id. ID: %v", uri.Uuid)})
+		return
+	}
+	if !item.IsOwner(authUser) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have permission to delete this item."})
+		return
+	}
+
+	fmt.Println("ここまできてる？")
+	// exec
 	err = itemManager.Delete(requested_uuid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
