@@ -15,6 +15,23 @@ type getOneByIdUri struct {
 	Id string `uri:"id" binding:"required"`
 }
 
+func Create(c *gin.Context) {
+	var request createRequest
+	err := c.Bind(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	id, err := userManager.Insert(request.Email, request.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user_id": id})
+}
+
 func FetchOneById(c *gin.Context) {
 	var uri getOneByIdUri
 	var id int
@@ -47,23 +64,6 @@ func FetchMe(c *gin.Context) {
 type createRequest struct {
 	Email    string `form:"email" binding:"required"`
 	Password string `form:"password" binding:"required"`
-}
-
-func Create(c *gin.Context) {
-	var request createRequest
-	err := c.Bind(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
-	id, err := userManager.Insert(request.Email, request.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"user_id": id})
 }
 
 type AuthRequest struct {
