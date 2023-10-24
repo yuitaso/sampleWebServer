@@ -11,12 +11,12 @@ import (
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
 
-type GetOneByIdUri struct {
+type getOneByIdUri struct {
 	Id string `uri:"id" binding:"required"`
 }
 
-func GetOneById(c *gin.Context) {
-	var uri GetOneByIdUri
+func FetchOneById(c *gin.Context) {
+	var uri getOneByIdUri
 	var id int
 
 	err := c.ShouldBindUri(&uri)
@@ -32,7 +32,7 @@ func GetOneById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.Uuid, "email": res.Email})
 }
 
-func GetUserMe(c *gin.Context) {
+func FetchMe(c *gin.Context) {
 	var user *entity.User
 	if val, exists := c.Get(entity.CtxAuthUserKey); !exists {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "ise."})
@@ -44,13 +44,13 @@ func GetUserMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"uuid": user.Uuid, "email": user.Email})
 }
 
-type CreateRequest struct {
+type createRequest struct {
 	Email    string `form:"email" binding:"required"`
 	Password string `form:"password" binding:"required"`
 }
 
 func Create(c *gin.Context) {
-	var request CreateRequest
+	var request createRequest
 	err := c.Bind(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})

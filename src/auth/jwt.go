@@ -44,7 +44,7 @@ type AuthClaims struct {
 
 func GenerateToken(user *entity.User) (string, error) {
 	claims := AuthClaims{
-		user.Uuid,
+		user.Uuid.String(),
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

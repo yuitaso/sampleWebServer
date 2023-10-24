@@ -35,7 +35,7 @@ func Insert(email string, rawPass string) (uint, error) {
 	}
 
 	data := UserTable{Uuid: uuid.String(), Email: email, Password: string(passwordHash)}
-	// とりま
+	// # if validate model
 	// if err = data.Validate(); err != nil {
 	// 	return 0, err
 	// }
@@ -62,7 +62,7 @@ func FindById(id int) (entity.User, error) {
 		return entity.User{}, executed.Error
 	}
 
-	return entity.User{Uuid: result.Uuid, Email: result.Email}, nil
+	return entity.User{Uuid: uuid.MustParse(result.Uuid), Email: result.Email}, nil
 }
 
 func VerifyAndGetUser(email string, password string) (*entity.User, error) {
@@ -85,11 +85,11 @@ func VerifyAndGetUser(email string, password string) (*entity.User, error) {
 		return &entity.User{}, err
 	}
 
-	return &entity.User{Id: result.ID, Email: result.Email, Uuid: result.Uuid}, nil
+	return &entity.User{Id: result.ID, Email: result.Email, Uuid: uuid.MustParse(result.Uuid)}, nil
 }
 
 func (u UserTable) Validate() error {
-	if !strings.Contains(u.Email, "@") { // とりあえず
+	if !strings.Contains(u.Email, "@") { // 条件は適当
 		return errors.New(fmt.Sprintf("Unexpected format of email: %v", u.Email))
 	}
 	return nil

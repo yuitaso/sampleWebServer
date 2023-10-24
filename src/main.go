@@ -18,9 +18,10 @@ func main() {
 	authorized := r.Group("/")
 	authorized.Use(authRequired)
 	{
-		authorized.GET("user/:id", userHandler.GetOneById)
-		authorized.GET("user/me", userHandler.GetUserMe)
+		authorized.GET("user/:id", userHandler.FetchOneById)
+		authorized.GET("user/me", userHandler.FetchMe)
 		authorized.POST("item/create", itemHandler.Create)
+		authorized.POST("item/:uuid/edit", itemHandler.Edit)
 	}
 
 	r.POST("/user/create", userHandler.Create)
