@@ -20,3 +20,5 @@ clean:
 
 sqlite:
 	mkdir $(REPOSITORY_ROOT)/sqlite
+
+reset: clean init

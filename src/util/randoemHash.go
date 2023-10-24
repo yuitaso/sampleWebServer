@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"log"
 )
 
 func generateRandomBytes(n int) ([]byte, error) {
@@ -30,10 +29,4 @@ func GenerateRandomHash() (string, error) {
 	hasher.Write(random)
 
 	return hex.EncodeToString(hasher.Sum(nil)), nil
-}
-
-func MustNot(e error) {
-	if e != nil {
-		log.Fatal(e.Error()) // TODO iikanji
-	}
 }

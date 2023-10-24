@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	"github.com/yuitaso/sampleWebServer/src/env"
-	"github.com/yuitaso/sampleWebServer/src/util"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ import (
 
 type UserTable struct {
 	gorm.Model
-	IdHash   string
+	Uuid     string
 	Email    string
 	Password string
 }
@@ -26,15 +26,15 @@ func (u UserTable) TableName() string {
 
 func Create(email string, rawPass string) (uint, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rawPass), bcrypt.MinCost)
-	idHash, err := util.GenerateRandomHash()
+	uuid, err := uuid.NewUUID()
 
-	fmt.Println(idHash)
+	fmt.Println(uuid.String())
 
 	if err != nil {
 		return 0, err
 	}
 
-	data := UserTable{IdHash: idHash, Email: email, Password: string(passwordHash)}
+	data := UserTable{Uuid: uuid.String(), Email: email, Password: string(passwordHash)}
 	// とりま
 	// if err = data.Validate(); err != nil {
 	// 	return 0, err
@@ -62,7 +62,7 @@ func FindById(id int) (entity.User, error) {
 		return entity.User{}, executed.Error
 	}
 
-	return entity.User{Uuid: result.IdHash, Email: result.Email}, nil
+	return entity.User{Uuid: result.Uuid, Email: result.Email}, nil
 }
 
 func VerifyPassword(email string, password string) (*entity.User, error) {
@@ -85,7 +85,7 @@ func VerifyPassword(email string, password string) (*entity.User, error) {
 		return &entity.User{}, err
 	}
 
-	return &entity.User{Email: result.Email, Uuid: result.IdHash}, nil
+	return &entity.User{Email: result.Email, Uuid: result.Uuid}, nil
 }
 
 func (u UserTable) Validate() error {
