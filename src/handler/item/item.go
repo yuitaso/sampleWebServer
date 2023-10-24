@@ -99,3 +99,28 @@ func Edit(c *gin.Context) {
 		"message": "updated.",
 	})
 }
+
+type deleteUri struct {
+	Uuid string `uri:"uuid" binding:"required"`
+}
+
+func Delete(c *gin.Context) {
+	var uri deleteUri
+	err := c.ShouldBindUri(&uri)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	requested_uuid, err := uuid.Parse(uri.Uuid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Bad id format: %v", uri.Uuid)})
+		return
+	}
+
+	err = itemManager.Delete(requested_uuid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "deleted."})
+}

@@ -22,6 +22,7 @@ func main() {
 		authorized.GET("user/me", userHandler.FetchMe)
 		authorized.POST("item/create", itemHandler.Create)
 		authorized.POST("item/:uuid/edit", itemHandler.Edit)
+		authorized.POST("item/:uuid/delete", itemHandler.Delete)
 	}
 
 	r.POST("/user/create", userHandler.Create)

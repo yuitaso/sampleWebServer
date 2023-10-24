@@ -6,13 +6,15 @@ import (
 	"github.com/yuitaso/sampleWebServer/src/env"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/plugin/soft_delete"
 )
 
 type ItemTable struct {
 	gorm.Model
-	Uuid   string
-	Price  int
-	UserId uint
+	Uuid      string
+	Price     int
+	UserId    uint
+	DeletedAt soft_delete.DeletedAt
 }
 
 func (i ItemTable) TableName() string {
@@ -69,4 +71,17 @@ func FindByUuid(id uuid.UUID) (*entity.Item, error) {
 	}
 
 	return &entity.Item{Id: result.ID, Uuid: uuid.MustParse(result.Uuid), Price: result.Price, UserId: result.UserId}, nil
+}
+
+func Delete(id uuid.UUID) error {
+	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
+	if err != nil {
+		return err
+	}
+
+	if executed := db.Where("uuid = ?", id.String()).Delete(&ItemTable{}); executed.Error != nil {
+		return executed.Error
+	}
+
+	return nil
 }
