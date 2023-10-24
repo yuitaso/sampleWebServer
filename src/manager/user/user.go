@@ -24,7 +24,7 @@ func (u UserTable) TableName() string {
 	return "user"
 }
 
-func Create(email string, rawPass string) (uint, error) {
+func Insert(email string, rawPass string) (uint, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rawPass), bcrypt.MinCost)
 	uuid, err := uuid.NewUUID()
 
@@ -65,7 +65,7 @@ func FindById(id int) (entity.User, error) {
 	return entity.User{Uuid: result.Uuid, Email: result.Email}, nil
 }
 
-func VerifyPassword(email string, password string) (*entity.User, error) {
+func VerifyAndGetUser(email string, password string) (*entity.User, error) {
 	var db *gorm.DB
 	var err error = nil
 
@@ -85,7 +85,7 @@ func VerifyPassword(email string, password string) (*entity.User, error) {
 		return &entity.User{}, err
 	}
 
-	return &entity.User{Email: result.Email, Uuid: result.Uuid}, nil
+	return &entity.User{Id: result.ID, Email: result.Email, Uuid: result.Uuid}, nil
 }
 
 func (u UserTable) Validate() error {

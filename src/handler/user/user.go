@@ -34,14 +34,14 @@ func GetOneById(c *gin.Context) {
 
 func GetUserMe(c *gin.Context) {
 	var user *entity.User
-	if val, exists := c.Get("authUser"); !exists {
+	if val, exists := c.Get(entity.CtxAuthUserKey); !exists {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "ise."})
 		return
 	} else {
 		user = val.(*entity.User)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"id": user.Uuid, "id_hash": user.Uuid, "email": user.Email})
+	c.JSON(http.StatusOK, gin.H{"uuid": user.Uuid, "email": user.Email})
 }
 
 type CreateRequest struct {
@@ -57,7 +57,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	id, err := userManager.Create(request.Email, request.Password)
+	id, err := userManager.Insert(request.Email, request.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -79,7 +79,7 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	user, err := userManager.VerifyPassword(request.Email, request.Password)
+	user, err := userManager.VerifyAndGetUser(request.Email, request.Password)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized."})
 		return

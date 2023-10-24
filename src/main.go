@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/yuitaso/sampleWebServer/src/entity"
+	itemHandler "github.com/yuitaso/sampleWebServer/src/handler/item"
 	userHandler "github.com/yuitaso/sampleWebServer/src/handler/user"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
@@ -18,10 +20,10 @@ func main() {
 	{
 		authorized.GET("user/:id", userHandler.GetOneById)
 		authorized.GET("user/me", userHandler.GetUserMe)
+		authorized.POST("item/create", itemHandler.Create)
 	}
 
 	r.POST("/user/create", userHandler.Create)
-	r.POST("/authenticate", userHandler.Authenticate) // TODO handlerの置き場変える
 
 	internalGroup := r.Group("/internal")
 	{
@@ -40,22 +42,20 @@ func healthCheckHandler(c *gin.Context) {
 	})
 }
 
-// security要件がないので一旦これで。
+// security要件がないので一旦これで。。
 const authEmailKey = "X-Email"
 const authPasswordKey = "X-Pass"
 
-const ContextAuthUserKey = "authUser"
-
-func authRequired(c *gin.Context) {
+func authRequired(c *gin.Context) { // TODO いい感じの置き場にGO
 	email := c.Request.Header.Get(authEmailKey)
 	password := c.Request.Header.Get(authPasswordKey)
 
-	user, err := userManager.VerifyPassword(email, password)
+	user, err := userManager.VerifyAndGetUser(email, password)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized."})
 		return
 	}
 
-	c.Set(ContextAuthUserKey, user)
+	c.Set(entity.CtxAuthUserKey, user)
 	c.Next()
 }
