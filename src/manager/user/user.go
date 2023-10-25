@@ -10,6 +10,8 @@ import (
 	"github.com/yuitaso/sampleWebServer/src/manager"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	pointLogManager "github.com/yuitaso/sampleWebServer/src/manager/pointLog"
 )
 
 type UserTable struct {
@@ -23,26 +25,24 @@ func (u UserTable) TableName() string {
 	return "user"
 }
 
-func Insert(email string, rawPass string) (uint, error) {
+func Insert(email string, rawPass string) (*entity.User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(rawPass), bcrypt.MinCost)
-	uuid, err := uuid.NewUUID()
-
-	fmt.Println(uuid.String())
-
+	user_uuid, err := uuid.NewRandom()
 	if err != nil {
-		return 0, err
+		return &entity.User{}, err
 	}
 
-	data := UserTable{Uuid: uuid.String(), Email: email, Password: string(passwordHash)}
+	data := UserTable{Uuid: user_uuid.String(), Email: email, Password: string(passwordHash)}
 	// # if validate model
 	// if err = data.Validate(); err != nil {
 	// 	return 0, err
 	// }
 
 	if executed := manager.DB.Create(&data); executed.Error != nil {
-		return 0, executed.Error
+		return &entity.User{}, executed.Error
 	}
-	return data.ID, nil
+
+	return &entity.User{Id: data.ID, Uuid: uuid.MustParse(data.Uuid), Email: data.Email}, nil
 }
 
 func FindById(id int) (entity.User, error) {
@@ -73,4 +73,27 @@ func (u UserTable) Validate() error {
 		return errors.New(fmt.Sprintf("Unexpected format of email: %v", u.Email))
 	}
 	return nil
+}
+
+func CreateUserWithPointGrant(email string, rawPass string, amount int) (*entity.User, error) {
+	var newUser *entity.User
+	var err error
+	err = manager.DB.Transaction(func(db *gorm.DB) error {
+		var err error
+		newUser, err = Insert(email, rawPass)
+		if err != nil {
+			return err
+		}
+
+		if err := pointLogManager.Insert(newUser, amount); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return newUser, nil
 }

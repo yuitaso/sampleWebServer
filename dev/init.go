@@ -6,6 +6,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/src/env"
 	itemManager "github.com/yuitaso/sampleWebServer/src/manager/item"
+	pointLogManager "github.com/yuitaso/sampleWebServer/src/manager/pointLog"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -31,4 +32,10 @@ func initDBTables() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = db.Table("pointLog").AutoMigrate(&pointLogManager.PointLog{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// closeしなくてよさそ？
 }

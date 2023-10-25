@@ -9,7 +9,6 @@ import (
 )
 
 func FetchMyBalans(c *gin.Context) {
-
 	authUser, ok := handler.GetAuthUserOrErrorRsponse(c)
 	if !ok {
 		return

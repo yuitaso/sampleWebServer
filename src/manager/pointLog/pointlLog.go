@@ -2,17 +2,22 @@ package pointlog
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	"github.com/yuitaso/sampleWebServer/src/manager"
+	"gorm.io/gorm"
 )
 
 type PointLog struct {
-	ID        uint      `gorm:"primarykey"`
-	CreatedAt time.Time `gorm:"index:idx_user"`
-	UserId    uint
-	Amount    int
+	gorm.Model
+	ID uint `gorm:"primarykey"`
+	// CreatedAt time.Time `gorm:"index:idx_user"`
+	UserId uint
+	Amount int
+}
+
+func (p PointLog) TableName() string {
+	return "pointLog"
 }
 
 func Insert(user *entity.User, amount int) error {
@@ -25,12 +30,18 @@ func Insert(user *entity.User, amount int) error {
 }
 
 func GetSum(user *entity.User) (int, error) {
-	var result *interface{}
-	if executed := manager.DB.Model(&PointLog{}).
-		Select("sum(amount) as total").Where("user_id = ?", user.Id).Group("name").First(result); executed.Error != nil {
-		return 0, nil
+
+	type result struct {
+		TotalAmount int
+	}
+	var res result
+	fmt.Println("ゆーざー", user.Id)
+	// hoge := manager.DB.Debug().Raw("select sum(amount) as total from pointLog where user_id = ?", user.Id)
+	// fmt.Println(hoge)
+	if executed := manager.DB.Model(&PointLog{}).Select("sum(amount) as total_amount").Where("user_id = 1").First(&res); executed.Error != nil {
+		fmt.Println("ほげ", executed)
+		return 0, executed.Error
 	}
 
-	fmt.Println(result)
-	return 1, nil
+	return res.TotalAmount, nil
 }

@@ -30,7 +30,7 @@ func main() {
 		authorized.POST("item/:uuid/edit", itemHandler.Edit)
 		authorized.POST("item/:uuid/delete", itemHandler.Delete)
 
-		authorized.GET("me/balance", pointHandler.FetchMyBalans)
+		authorized.GET("point/balance", pointHandler.FetchMyBalans)
 	}
 
 	r.POST("/user/create", userHandler.Create)

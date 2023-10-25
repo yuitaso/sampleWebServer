@@ -23,13 +23,18 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	id, err := userManager.Insert(request.Email, request.Password)
+	newUser, err := userManager.CreateUserWithPointGrant(request.Email, request.Password, entity.InitialPointAmount)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user_id": id})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Success.",
+		"user": map[string]string{
+			"uuid": newUser.Uuid.String(),
+			"email": newUser.Email,
+	}})
 }
 
 func FetchOneById(c *gin.Context) {

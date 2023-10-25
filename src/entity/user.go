@@ -9,3 +9,4 @@ type User struct {
 }
 
 var CtxAuthUserKey = "authUser"
+var InitialPointAmount = 10000 // when user created
