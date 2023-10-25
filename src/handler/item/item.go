@@ -21,8 +21,6 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(authUser)
-
 	var request createRequest
 	err := c.Bind(&request)
 	if err != nil {

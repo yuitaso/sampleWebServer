@@ -8,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	itemHandler "github.com/yuitaso/sampleWebServer/src/handler/item"
+	pointHandler "github.com/yuitaso/sampleWebServer/src/handler/point"
 	userHandler "github.com/yuitaso/sampleWebServer/src/handler/user"
 	"github.com/yuitaso/sampleWebServer/src/manager"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
@@ -28,6 +29,8 @@ func main() {
 		authorized.POST("item/create", itemHandler.Create)
 		authorized.POST("item/:uuid/edit", itemHandler.Edit)
 		authorized.POST("item/:uuid/delete", itemHandler.Delete)
+
+		authorized.GET("me/balance", pointHandler.FetchMyBalans)
 	}
 
 	r.POST("/user/create", userHandler.Create)

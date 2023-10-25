@@ -1,16 +1,13 @@
 package entity
 
-import "gorm.io/gorm"
-
-type UserPoint struct {
-	gorm.Model
-	Amount int
-	UserID uint
-}
+import (
+	"time"
+)
 
 type PointLog struct {
-	gorm.Model
-	UserId uint
-	Amount int
+	ID         uint `gorm:"primarykey"`
+	UserId     uint `gorm:"index:idx_user"`
+	Amount     int
 	ContractId uint
+	CreatedAt  time.Time
 }
