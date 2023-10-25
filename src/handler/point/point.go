@@ -1,6 +1,7 @@
 package point
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,9 @@ func FetchMyBalans(c *gin.Context) {
 	if !ok {
 		return
 	}
+	fmt.Println(authUser)
 
-	balance, err := pointlogManager.GetSum(authUser)
+	balance, err := pointlogManager.FetchCurrentPoint(authUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "cannot find.", "error": err.Error()})
 		return

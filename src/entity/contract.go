@@ -1,8 +1,8 @@
 package entity
 
 type Contract struct {
-	UserId uint
-	ItemId uint
+	ContractId    uint
+	BuyerUserId   uint
+	ItemId        uint
 	PaymentAmount int
 }
-

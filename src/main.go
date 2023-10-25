@@ -24,12 +24,12 @@ func main() {
 	authorized := r.Group("/")
 	authorized.Use(authRequired)
 	{
-		authorized.GET("user/:id", userHandler.FetchOneById)
+		authorized.GET("user/:uuid", userHandler.FetchOneByUuid)
 		authorized.GET("user/me", userHandler.FetchMe)
 		authorized.POST("item/create", itemHandler.Create)
 		authorized.POST("item/:uuid/edit", itemHandler.Edit)
-		authorized.POST("item/:uuid/delete", itemHandler.Delete)
-
+		authorized.POST("item/:uuid/delete", itemHandler.DeleteByUuid)
+		authorized.POST("item/:uuid/buy", itemHandler.Buy)
 		authorized.GET("point/balance", pointHandler.FetchMyBalans)
 	}
 

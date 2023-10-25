@@ -3,17 +3,13 @@ package user
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/yuitaso/sampleWebServer/src/auth"
 	"github.com/yuitaso/sampleWebServer/src/entity"
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
-
-type getOneByIdUri struct {
-	Id string `uri:"id" binding:"required"`
-}
 
 func Create(c *gin.Context) {
 	var request createRequest
@@ -32,26 +28,29 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Success.",
 		"user": map[string]string{
-			"uuid": newUser.Uuid.String(),
+			"uuid":  newUser.Uuid.String(),
 			"email": newUser.Email,
-	}})
+		}})
 }
 
-func FetchOneById(c *gin.Context) {
-	var uri getOneByIdUri
-	var id int
+type getOneByIdUri struct {
+	Uuid string `uri:"uuid" binding:"required"`
+}
 
+func FetchOneByUuid(c *gin.Context) {
+	var uri getOneByIdUri
 	err := c.ShouldBindUri(&uri)
-	id, err = strconv.Atoi(uri.Id)
+
+	user_uuid, err := uuid.Parse(uri.Uuid)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()}) // いい感じに返すConfがあるはず
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid id."}) // いい感じに返すConfがあるはず
 	}
 
-	res, err := userManager.FindById(id)
+	result, err := userManager.FindByUuid(&user_uuid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "cannot find.", "error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"id": uri.Id, "id_hash": res.Uuid, "email": res.Email})
+	c.JSON(http.StatusOK, gin.H{"id": result.Id, "uuid": result.Uuid, "email": result.Email})
 }
 
 func FetchMe(c *gin.Context) {

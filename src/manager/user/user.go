@@ -45,20 +45,30 @@ func Insert(email string, rawPass string) (*entity.User, error) {
 	return &entity.User{Id: data.ID, Uuid: uuid.MustParse(data.Uuid), Email: data.Email}, nil
 }
 
-func FindById(id int) (entity.User, error) {
+func FindById(id uint) (*entity.User, error) {
 	var result UserTable
 	if executed := manager.DB.First(&result, id); executed.Error != nil {
-		return entity.User{}, executed.Error
+		return &entity.User{}, executed.Error
 	}
 
-	return entity.User{Uuid: uuid.MustParse(result.Uuid), Email: result.Email}, nil
+	return &entity.User{Id: result.ID, Uuid: uuid.MustParse(result.Uuid), Email: result.Email}, nil
+}
+
+func FindByUuid(user_uuid *uuid.UUID) (*entity.User, error) {
+	var result UserTable
+	if executed := manager.DB.Where("uuid = ?", user_uuid.String()).First(&result); executed.Error != nil {
+		return &entity.User{}, executed.Error
+	}
+
+	return &entity.User{Id: result.ID, Uuid: uuid.MustParse(result.Uuid), Email: result.Email}, nil
 }
 
 func VerifyAndGetUser(email string, password string) (*entity.User, error) {
 	var result UserTable
-	if executed := manager.DB.First(&result, "email = ?", email); executed.Error != nil {
+	if executed := manager.DB.Where("email = ?", email).First(&result); executed.Error != nil {
 		return &entity.User{}, executed.Error
 	}
+	
 
 	// imo 毎回キャストするとメモリ効率が悪いのでいい感じにしたい
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password)); err != nil {
@@ -85,7 +95,8 @@ func CreateUserWithPointGrant(email string, rawPass string, amount int) (*entity
 			return err
 		}
 
-		if err := pointLogManager.Insert(newUser, amount); err != nil {
+		_, err = pointLogManager.GrantPoint(newUser, amount)
+		if err != nil {
 			return err
 		}
 

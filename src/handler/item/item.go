@@ -101,17 +101,13 @@ type deleteUri struct {
 	Uuid string `uri:"uuid" binding:"required"`
 }
 
-func Delete(c *gin.Context) {
+func DeleteByUuid(c *gin.Context) {
 	// parse uri
 	var uri deleteUri
 	err := c.ShouldBindUri(&uri)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
 	requested_uuid, err := uuid.Parse(uri.Uuid)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Bad id format: %v", uri.Uuid)})
+		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid uuid.")})
 		return
 	}
 
@@ -132,12 +128,49 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("ここまできてる？")
 	// exec
-	err = itemManager.Delete(requested_uuid)
+	err = itemManager.DeleteByUuid(requested_uuid)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "deleted."})
+}
+
+type buyUri struct {
+	Uuid string `uri:"uuid" binding:"required"`
+}
+
+func Buy(c *gin.Context) {
+	// parse uri
+	var uri buyUri
+	err := c.ShouldBindUri(&uri)
+	requested_uuid, err := uuid.Parse(uri.Uuid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid uuid.")})
+		return
+	}
+	authUser, ok := handler.GetAuthUserOrErrorRsponse(c)
+	if !ok {
+		return
+	}
+
+	// check permission
+	item, err := itemManager.FindByUuid(requested_uuid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("Invalid id. ID: %v", uri.Uuid)})
+		return
+	}
+	if item.IsOwner(authUser) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "This item is yours."})
+		return
+	}
+
+	// exec
+	if err := itemManager.Buy(authUser, item); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Success."})
 }
