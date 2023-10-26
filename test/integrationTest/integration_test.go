@@ -52,4 +52,5 @@ func TestCreateUser(t *testing.T) {
 	_ = json.Unmarshal(byteArray, &jsonRes)
 
 	assert.Equal(t, resp.StatusCode, 200)
+	assert.Equal(t, resp.StatusCode, 200)
 }

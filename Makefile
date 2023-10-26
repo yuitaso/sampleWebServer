@@ -24,14 +24,21 @@ sqlite:
 reset: clean init
 
 # test
-.PHONY: test/server test/init test/clean test/reset
+.PHONY: test test/server test/init test/clean test/reset
+
+test:
+	go test test/integrationTest/integration_test.go
+
 test/server: test/reset
 	go run src/main.go -e test
 
 test/init: sqlite
 	go run dev/init.go -e test
 
+test/seed:
+	sqlite3 ./sqlite/test.db < test/integrationTest/seeds.sql
+
 test/clean:
 	rm -f sqlite/test.db
 
-test/reset: test/clean test/init
+test/reset: test/clean test/init test/seed

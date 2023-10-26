@@ -81,7 +81,3 @@ func authRequired(c *gin.Context) { // TODO いい感じの置き場にGO
 	c.Set(entity.CtxAuthUserKey, user)
 	c.Next()
 }
-
-func openDatabase() {
-
-}

@@ -28,5 +28,4 @@ func SetEnv(e string) {
 			DbName: DbNameDev,
 		}
 	}
-
 }
