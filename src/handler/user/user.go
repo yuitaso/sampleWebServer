@@ -11,6 +11,11 @@ import (
 	userManager "github.com/yuitaso/sampleWebServer/src/manager/user"
 )
 
+type createRequest struct {
+	Email    string `form:"email" binding:"required"`
+	Password string `form:"password" binding:"required"`
+}
+
 func Create(c *gin.Context) {
 	var request createRequest
 	err := c.Bind(&request)
@@ -63,11 +68,6 @@ func FetchMe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"uuid": user.Uuid, "email": user.Email})
-}
-
-type createRequest struct {
-	Email    string `form:"email" binding:"required"`
-	Password string `form:"password" binding:"required"`
 }
 
 type AuthRequest struct {

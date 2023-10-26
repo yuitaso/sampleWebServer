@@ -1,12 +1,15 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuitaso/sampleWebServer/src/entity"
+	"github.com/yuitaso/sampleWebServer/src/env"
 	itemHandler "github.com/yuitaso/sampleWebServer/src/handler/item"
 	pointHandler "github.com/yuitaso/sampleWebServer/src/handler/point"
 	userHandler "github.com/yuitaso/sampleWebServer/src/handler/user"
@@ -15,6 +18,13 @@ import (
 )
 
 func init() {
+	var (
+		e = flag.String("e", "dev", "string flag")
+	)
+	flag.Parse()
+	fmt.Println("Execute with env: ", *e)
+
+	env.SetEnv(*e)
 	manager.OpenDB()
 }
 
@@ -26,10 +36,12 @@ func main() {
 	{
 		authorized.GET("user/:uuid", userHandler.FetchOneByUuid)
 		authorized.GET("user/me", userHandler.FetchMe)
+
 		authorized.POST("item/create", itemHandler.Create)
 		authorized.POST("item/:uuid/edit", itemHandler.Edit)
 		authorized.POST("item/:uuid/delete", itemHandler.DeleteByUuid)
 		authorized.POST("item/:uuid/buy", itemHandler.Buy)
+
 		authorized.GET("point/balance", pointHandler.FetchMyBalans)
 	}
 

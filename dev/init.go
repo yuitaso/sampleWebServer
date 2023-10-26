@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -13,13 +15,28 @@ import (
 	"gorm.io/gorm"
 )
 
+func init() {
+	var (
+		e = flag.String("e", "dev", "string flag")
+	)
+	flag.Parse()
+	fmt.Println("Execute with env: ", *e)
+
+	env.SetEnv(*e)
+
+	fmt.Println("RUNS ON >>> ------------")
+	fmt.Println("env = ", env.Env.Env)
+	fmt.Println("db = ", env.Env.DbName)
+	fmt.Println("------------------------")
+}
+
 func main() {
 	initDBTables()
 }
 
 func initDBTables() {
 	// open
-	db, err := gorm.Open(sqlite.Open(env.DbName), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(env.Env.DbName), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
